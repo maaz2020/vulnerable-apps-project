@@ -3,14 +3,12 @@ stages:
   - iac
   - dast
 
-variables:
-  SNYK_TOKEN: $SNYK_TOKEN
-
 # SCA Scan for Docker images
 sca-docker:
   stage: sca
   image: snyk/snyk:docker
   script:
+    - export SNYK_TOKEN=$SNYK_TOKEN
     - snyk auth $SNYK_TOKEN
     - snyk container test bkimminich/juice-shop > juice-shop-sca.txt || true
     - snyk container test webgoat/webgoat-8.2 > webgoat-sca.txt || true
@@ -24,6 +22,7 @@ iac-scan:
   stage: iac
   image: snyk/snyk:docker
   script:
+    - export SNYK_TOKEN=$SNYK_TOKEN
     - snyk auth $SNYK_TOKEN
     - snyk iac test terraform/ > iac-scan-report.txt || true
   artifacts:
