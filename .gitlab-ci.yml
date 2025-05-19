@@ -1,11 +1,11 @@
 stages:
-  - sca
-  - iac
-  - dast
+  - scaScan
+  - iacScan
+  - dastScan
 
 # SCA Scan for Docker images
 sca-docker:
-  stage: sca
+  stage: scaScan
   image: snyk/snyk-cli:latest
   script:
     - export SNYK_TOKEN=$SNYK_TOKEN
@@ -19,8 +19,8 @@ sca-docker:
 
 # IaC Scan for Terraform
 iac-scan:
-  stage: iac
-  image: snyk/snyk:docker
+  stage: iacScan
+  image: snyk/snyk-cli:latest
   script:
     - export SNYK_TOKEN=$SNYK_TOKEN
     - snyk auth $SNYK_TOKEN
@@ -31,7 +31,7 @@ iac-scan:
 
 # DAST Scan for Juice Shop and WebGoat
 dast-zap:
-  stage: dast
+  stage: dastScan
   image: owasp/zap2docker-stable
   services:
     - docker:dind
