@@ -6,7 +6,7 @@ stages:
 # SCA Scan for Docker images
 sca-docker:
   stage: sca
-  image: snyk/snyk:docker
+  image: snyk/snyk-cli:latest
   script:
     - export SNYK_TOKEN=$SNYK_TOKEN
     - snyk auth $SNYK_TOKEN
