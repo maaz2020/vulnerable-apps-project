@@ -1,0 +1,49 @@
+stages:
+  - sca
+  - iac
+  - dast
+
+variables:
+  SNYK_TOKEN: $SNYK_TOKEN
+
+# SCA Scan for Docker images
+sca-docker:
+  stage: sca
+  image: snyk/snyk:docker
+  script:
+    - snyk auth $SNYK_TOKEN
+    - snyk container test bkimminich/juice-shop > juice-shop-sca.txt || true
+    - snyk container test webgoat/webgoat-8.2 > webgoat-sca.txt || true
+  artifacts:
+    paths:
+      - juice-shop-sca.txt
+      - webgoat-sca.txt
+
+# IaC Scan for Terraform
+iac-scan:
+  stage: iac
+  image: snyk/snyk:docker
+  script:
+    - snyk auth $SNYK_TOKEN
+    - snyk iac test terraform/ > iac-scan-report.txt || true
+  artifacts:
+    paths:
+      - iac-scan-report.txt
+
+# DAST Scan for Juice Shop and WebGoat
+dast-zap:
+  stage: dast
+  image: owasp/zap2docker-stable
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache docker-compose curl
+    - docker-compose -f docker-compose.yml up -d
+    - sleep 30
+  script:
+    - zap-baseline.py -t http://localhost:3000 -r juice-shop-zap.html || true
+    - zap-baseline.py -t http://localhost:8080/WebGoat -r webgoat-zap.html || true
+  artifacts:
+    paths:
+      - juice-shop-zap.html
+      - webgoat-zap.html
